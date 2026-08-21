@@ -1,31 +1,31 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import { useKanban } from '../context/KanbanContext';
 
+const getToday = () => {
+  const today = new Date();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${today.getFullYear()}-${month}-${day}`;
+};
+
 export default function TaskModal({ task, onClose }) {
-  const { categories, people, addTask, updateTask, deleteTask, addCategory } = useKanban();
+  const { addTask, updateTask, deleteTask } = useKanban();
   const isEditing = !!task;
+  const today = getToday();
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: '',
-    responsiblePerson: '',
     startDate: '',
     dueDate: '',
   });
-
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryColor, setNewCategoryColor] = useState('#2563eb');
 
   useEffect(() => {
     if (task) {
       setFormData({
         title: task.title || '',
         description: task.description || '',
-        category: task.category || '',
-        responsiblePerson: task.responsiblePerson || '',
         startDate: task.startDate || '',
         dueDate: task.dueDate || '',
       });
@@ -34,26 +34,23 @@ export default function TaskModal({ task, onClose }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'startDate' && value < today) return;
+    if (name === 'dueDate' && value < (formData.startDate || today)) return;
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'startDate' && prev.dueDate < value ? { dueDate: '' } : {}),
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (formData.dueDate && formData.startDate && formData.dueDate < formData.startDate) return;
     if (isEditing) updateTask(task.id, formData);
     else addTask(formData);
     onClose();
   };
-
-  const handleAddCategory = () => {
-    if (newCategoryName.trim()) {
-      const added = addCategory(newCategoryName, newCategoryColor);
-      setFormData(prev => ({ ...prev, category: added.id }));
-      setIsAddingCategory(false);
-      setNewCategoryName('');
-    }
-  };
-
-  const colorOptions = ['#2563eb', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'];
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -99,6 +96,7 @@ export default function TaskModal({ task, onClose }) {
                   name="startDate" 
                   value={formData.startDate} 
                   onChange={handleChange} 
+                  min={today}
                   className="form-control"
                 />
               </div>
@@ -109,70 +107,9 @@ export default function TaskModal({ task, onClose }) {
                   name="dueDate" 
                   value={formData.dueDate} 
                   onChange={handleChange} 
+                  min={formData.startDate || today}
                   className="form-control"
                 />
-              </div>
-            </div>
-            
-            <div className="form-row">
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Assign To</label>
-                <select 
-                  name="responsiblePerson" 
-                  value={formData.responsiblePerson} 
-                  onChange={handleChange} 
-                  className="form-control"
-                >
-                  <option value="">Unassigned</option>
-                  {people.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-              </div>
-              
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Category</label>
-                {!isAddingCategory ? (
-                  <div className="flex gap-2">
-                    <select 
-                      name="category" 
-                      value={formData.category} 
-                      onChange={handleChange} 
-                      className="form-control"
-                    >
-                      <option value="">Select category...</option>
-                      {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                    <button type="button" className="btn btn-secondary btn-icon" onClick={() => setIsAddingCategory(true)}>
-                      <Plus size={20} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="category-creator">
-                    <input 
-                      type="text" 
-                      value={newCategoryName} 
-                      onChange={(e) => setNewCategoryName(e.target.value)} 
-                      placeholder="New category name"
-                      className="form-control"
-                      style={{ marginBottom: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                      autoFocus
-                    />
-                    <div className="color-options">
-                      {colorOptions.map(color => (
-                        <button
-                          key={color}
-                          type="button"
-                          className={`color-dot ${newCategoryColor === color ? 'selected' : ''}`}
-                          style={{ backgroundColor: color }}
-                          onClick={() => setNewCategoryColor(color)}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <button type="button" className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={handleAddCategory}>Add</button>
-                      <button type="button" className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => setIsAddingCategory(false)}>Cancel</button>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </form>

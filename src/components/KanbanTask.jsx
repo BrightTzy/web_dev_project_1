@@ -1,9 +1,8 @@
-import { Draggable } from '@hello-pangea/dnd';
 import { Calendar, Clock, User, CheckCircle } from 'lucide-react';
 import { useKanban } from '../context/KanbanContext';
 
-export default function KanbanTask({ task, index, onEdit }) {
-  const { categories, people } = useKanban();
+export default function KanbanTask({ task, onEdit }) {
+  const { categories, people, moveTask } = useKanban();
   
   const category = categories.find(c => c.id === task.category);
   const person = people.find(p => p.id === task.responsiblePerson);
@@ -11,15 +10,7 @@ export default function KanbanTask({ task, index, onEdit }) {
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'DONE';
 
   return (
-    <Draggable draggableId={task.id} index={index}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          className={`task-card ${snapshot.isDragging ? 'is-dragging' : ''}`}
-          onClick={() => onEdit(task)}
-        >
+        <div className="task-card" onClick={() => onEdit(task)}>
           <div className="task-header">
             {category ? (
               <span className="task-chip" style={{ backgroundColor: category.color }}>
@@ -54,6 +45,19 @@ export default function KanbanTask({ task, index, onEdit }) {
                 <span>{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due'}</span>
               </div>
             </div>
+
+            <label className="task-status-control" onClick={(event) => event.stopPropagation()}>
+              <span>Status</span>
+              <select
+                value={task.status}
+                onChange={(event) => moveTask(task.id, event.target.value)}
+                aria-label={`Change status for ${task.title}`}
+              >
+                <option value="TO DO">TO DO</option>
+                <option value="DOING">DOING</option>
+                <option value="DONE">DONE</option>
+              </select>
+            </label>
             
             {task.completeDate && (
                <div className="task-footer-row text-success" style={{ marginTop: '0.5rem' }}>
@@ -63,7 +67,5 @@ export default function KanbanTask({ task, index, onEdit }) {
             )}
           </div>
         </div>
-      )}
-    </Draggable>
   );
 }

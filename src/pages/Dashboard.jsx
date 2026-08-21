@@ -6,7 +6,7 @@ import {
 import { CheckCircle, Clock, ListTodo, AlertCircle, Hash } from 'lucide-react';
 
 export default function Dashboard() {
-  const { tasks, categories } = useKanban();
+  const { tasks } = useKanban();
 
   const totalTasks = tasks.length;
   const todoCount = tasks.filter(t => t.status === 'TO DO').length;
@@ -26,24 +26,6 @@ export default function Dashboard() {
     { name: 'DOING', value: doingCount, color: '#3b82f6' },
     { name: 'DONE', value: doneCount, color: '#22c55e' }
   ].filter(item => item.value > 0);
-
-  const categoryMap = {};
-  categories.forEach(c => categoryMap[c.id] = c.name);
-  
-  const categoryCounts = {};
-  tasks.forEach(t => {
-    if (t.category) {
-      const catName = categoryMap[t.category] || 'Unknown';
-      categoryCounts[catName] = (categoryCounts[catName] || 0) + 1;
-    } else {
-      categoryCounts['Uncategorized'] = (categoryCounts['Uncategorized'] || 0) + 1;
-    }
-  });
-  
-  const categoryData = Object.keys(categoryCounts).map(key => ({
-    name: key,
-    tasks: categoryCounts[key]
-  }));
 
   let early = 0, onTime = 0, late = 0;
   tasks.filter(t => t.status === 'DONE' && t.dueDate && t.completeDate).forEach(t => {
@@ -127,22 +109,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="chart-panel">
-        <h3>Tasks by Category</h3>
-        <div style={{ height: '350px' }}>
-          {categoryData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryData} layout="vertical" margin={{ left: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                <XAxis type="number" axisLine={false} tickLine={false} allowDecimals={false} />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} />
-                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-                <Bar dataKey="tasks" fill="#2563eb" radius={[0, 4, 4, 0]} barSize={24} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '4rem' }}>No data available</p>}
-        </div>
-      </div>
     </div>
   );
 }
