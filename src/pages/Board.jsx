@@ -32,9 +32,9 @@ export default function Board() {
           <KanbanColumn
             key={column.id}
             title={column.title}
-            tasks={tasks.filter(t => t.status === column.id)}
-            onEditTask={(t) => {
-              setEditingTask(t);
+            tasks={tasks.filter(task => task.status === column.id)}
+            onEditTask={(taskToEdit) => {
+              setEditingTask(taskToEdit);
               setIsModalOpen(true);
             }}
           />

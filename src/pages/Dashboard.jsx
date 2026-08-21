@@ -17,47 +17,8 @@ const getCurrentTime = () => {
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 };
 
-const getScheduleValue = (date, time) => `${date}T${time || '00:00'}`;
-
-export default function Dashboard() {
-  const { tasks } = useKanban();
-
-  const totalTasks = tasks.length;
-  const todoCount = tasks.filter(t => t.status === 'TO DO').length;
-  const doingCount = tasks.filter(t => t.status === 'DOING').length;
-  const doneCount = tasks.filter(t => t.status === 'DONE').length;
-  
-  const overdueCount = tasks.filter(t => {
-    if (t.status === 'DONE' || !t.dueDate) return false;
-    return t.dueDate < getToday() ||
-      (t.dueDate === getToday() && t.dueTime && t.dueTime < getCurrentTime());
-  }).length;
-
-  const statusData = [
-    { name: 'TO DO', value: todoCount, color: '#94a3b8' },
-    { name: 'DOING', value: doingCount, color: '#3b82f6' },
-    { name: 'DONE', value: doneCount, color: '#22c55e' }
-  ].filter(item => item.value > 0);
-
-  let early = 0, onTime = 0, late = 0;
-  tasks.filter(t => t.status === 'DONE' && t.dueDate && t.completeDate).forEach(t => {
-    const hasTimes = t.dueTime && t.completeTime;
-    const due = hasTimes ? getScheduleValue(t.dueDate, t.dueTime) : t.dueDate;
-    const completed = hasTimes
-      ? getScheduleValue(t.completeDate, t.completeTime)
-      : t.completeDate;
-    if (completed < due) early++;
-    else if (completed > due) late++;
-    else onTime++;
-  });
-
-  const performanceData = [
-    { name: 'Early', count: early, fill: '#8b5cf6' },
-    { name: 'On Time', count: onTime, fill: '#14b8a6' },
-    { name: 'Late', count: late, fill: '#f43f5e' }
-  ];
-
-  const StatCard = ({ title, value, icon: Icon, bgColor }) => (
+function StatCard({ title, value, icon: Icon, bgColor }) {
+  return (
     <div className="stat-card">
       <div className="stat-icon" style={{ backgroundColor: bgColor }}>
         <Icon size={24} />
@@ -68,6 +29,45 @@ export default function Dashboard() {
       </div>
     </div>
   );
+}
+
+export default function Dashboard() {
+  const { tasks } = useKanban();
+
+  const totalTasks = tasks.length;
+  const todoCount = tasks.filter(task => task.status === 'TO DO').length;
+  const doingCount = tasks.filter(task => task.status === 'DOING').length;
+  const doneCount = tasks.filter(task => task.status === 'DONE').length;
+  
+  const overdueCount = tasks.filter(task => {
+    if (task.status === 'DONE' || !task.dueDate) return false;
+    return task.dueDate < getToday() ||
+      (task.dueDate === getToday() && task.dueTime && task.dueTime < getCurrentTime());
+  }).length;
+
+  const statusData = [
+    { name: 'TO DO', value: todoCount, color: '#94a3b8' },
+    { name: 'DOING', value: doingCount, color: '#3b82f6' },
+    { name: 'DONE', value: doneCount, color: '#22c55e' }
+  ].filter(item => item.value > 0);
+
+  let early = 0, onTime = 0, late = 0;
+  tasks.filter(task => task.status === 'DONE' && task.dueDate && task.completeDate).forEach(task => {
+    const hasTimes = task.dueTime && task.completeTime;
+    const due = hasTimes ? getScheduleValue(task.dueDate, task.dueTime) : task.dueDate;
+    const completed = hasTimes
+      ? getScheduleValue(task.completeDate, task.completeTime)
+      : task.completeDate;
+    if (completed < due) early++;
+    else if (completed > due) late++;
+    else onTime++;
+  });
+
+  const performanceData = [
+    { name: 'Early', count: early, fill: '#8b5cf6' },
+    { name: 'On Time', count: onTime, fill: '#14b8a6' },
+    { name: 'Late', count: late, fill: '#f43f5e' }
+  ];
 
   return (
     <div style={{ paddingBottom: '2rem' }}>
@@ -105,7 +105,7 @@ export default function Dashboard() {
         <div className="chart-panel">
           <h3>Completion Performance</h3>
           <div style={{ height: '300px' }}>
-            {performanceData.some(d => d.count > 0) ? (
+            {performanceData.some(item => item.count > 0) ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={performanceData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />

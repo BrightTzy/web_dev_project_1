@@ -22,8 +22,8 @@ const formatSchedule = (date, time, fallback) => {
 export default function KanbanTask({ task, onEdit }) {
   const { categories, people, moveTask } = useKanban();
   
-  const category = categories.find(c => c.id === task.category);
-  const person = people.find(p => p.id === task.responsiblePerson);
+  const category = categories.find(categoryItem => categoryItem.id === task.category);
+  const person = people.find(personItem => personItem.id === task.responsiblePerson);
   
   const isOverdue = task.dueDate && (
     task.dueDate < getToday() ||
