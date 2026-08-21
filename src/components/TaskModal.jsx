@@ -9,6 +9,12 @@ const getToday = () => {
   return `${today.getFullYear()}-${month}-${day}`;
 };
 
+const isBeforeSchedule = (startDate, startTime, dueDate, dueTime) => {
+  if (!startDate || !dueDate) return false;
+  if (dueDate < startDate) return true;
+  return dueDate === startDate && startTime && dueTime && dueTime < startTime;
+};
+
 export default function TaskModal({ task, onClose }) {
   const { addTask, updateTask, deleteTask } = useKanban();
   const isEditing = !!task;
@@ -18,7 +24,9 @@ export default function TaskModal({ task, onClose }) {
     title: '',
     description: '',
     startDate: '',
+    startTime: '',
     dueDate: '',
+    dueTime: '',
   });
 
   useEffect(() => {
@@ -27,26 +35,43 @@ export default function TaskModal({ task, onClose }) {
         title: task.title || '',
         description: task.description || '',
         startDate: task.startDate || '',
+        startTime: task.startTime || '',
         dueDate: task.dueDate || '',
+        dueTime: task.dueTime || '',
       });
     }
   }, [task]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const nextFormData = { ...formData, [name]: value };
+
     if (name === 'startDate' && value < today) return;
     if (name === 'dueDate' && value < (formData.startDate || today)) return;
+    if (
+      (name === 'dueTime' || name === 'dueDate') &&
+      isBeforeSchedule(nextFormData.startDate, nextFormData.startTime, nextFormData.dueDate, nextFormData.dueTime)
+    ) return;
 
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-      ...(name === 'startDate' && prev.dueDate < value ? { dueDate: '' } : {}),
-    }));
+    if (
+      (name === 'startDate' || name === 'startTime') &&
+      nextFormData.dueDate &&
+      isBeforeSchedule(nextFormData.startDate, nextFormData.startTime, nextFormData.dueDate, nextFormData.dueTime)
+    ) {
+      nextFormData.dueDate = '';
+      nextFormData.dueTime = '';
+    }
+
+    setFormData(nextFormData);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.dueDate && formData.startDate && formData.dueDate < formData.startDate) return;
+    if (
+      formData.dueDate &&
+      formData.startDate &&
+      isBeforeSchedule(formData.startDate, formData.startTime, formData.dueDate, formData.dueTime)
+    ) return;
     if (isEditing) updateTask(task.id, formData);
     else addTask(formData);
     onClose();
@@ -99,6 +124,14 @@ export default function TaskModal({ task, onClose }) {
                   min={today}
                   className="form-control"
                 />
+                <label>Start Time</label>
+                <input
+                  type="time"
+                  name="startTime"
+                  value={formData.startTime}
+                  onChange={handleChange}
+                  className="form-control"
+                />
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>Due Date</label>
@@ -108,6 +141,15 @@ export default function TaskModal({ task, onClose }) {
                   value={formData.dueDate} 
                   onChange={handleChange} 
                   min={formData.startDate || today}
+                  className="form-control"
+                />
+                <label>Due Time</label>
+                <input
+                  type="time"
+                  name="dueTime"
+                  value={formData.dueTime}
+                  onChange={handleChange}
+                  min={formData.startDate === formData.dueDate ? formData.startTime : undefined}
                   className="form-control"
                 />
               </div>

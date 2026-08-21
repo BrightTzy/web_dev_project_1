@@ -59,10 +59,10 @@ npm run lint     # Run Oxlint
 5. Open `/dashboard` to review progress statistics and charts.
 
 ## Screenshot
-
-Replace the placeholder below with a screenshot of the application:
-
-![Kanban project screenshot](path/to/screenshot.png)
+![Kanban project screenshot](ss/1.png)
+![Kanban project screenshot](ss/2.png)
+![Kanban project screenshot](ss/3.png)
+![Kanban project screenshot](ss/4.png)
 
 ## Team Members
 

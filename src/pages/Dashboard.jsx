@@ -5,6 +5,20 @@ import {
 } from 'recharts';
 import { CheckCircle, Clock, ListTodo, AlertCircle, Hash } from 'lucide-react';
 
+const getToday = () => {
+  const today = new Date();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${today.getFullYear()}-${month}-${day}`;
+};
+
+const getCurrentTime = () => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+};
+
+const getScheduleValue = (date, time) => `${date}T${time || '00:00'}`;
+
 export default function Dashboard() {
   const { tasks } = useKanban();
 
@@ -13,12 +27,10 @@ export default function Dashboard() {
   const doingCount = tasks.filter(t => t.status === 'DOING').length;
   const doneCount = tasks.filter(t => t.status === 'DONE').length;
   
-  const today = new Date();
-  today.setHours(0,0,0,0);
   const overdueCount = tasks.filter(t => {
     if (t.status === 'DONE' || !t.dueDate) return false;
-    const dueDate = new Date(t.dueDate);
-    return dueDate < today;
+    return t.dueDate < getToday() ||
+      (t.dueDate === getToday() && t.dueTime && t.dueTime < getCurrentTime());
   }).length;
 
   const statusData = [
@@ -29,10 +41,11 @@ export default function Dashboard() {
 
   let early = 0, onTime = 0, late = 0;
   tasks.filter(t => t.status === 'DONE' && t.dueDate && t.completeDate).forEach(t => {
-    const due = new Date(t.dueDate);
-    const completed = new Date(t.completeDate);
-    due.setHours(0,0,0,0);
-    completed.setHours(0,0,0,0);
+    const hasTimes = t.dueTime && t.completeTime;
+    const due = hasTimes ? getScheduleValue(t.dueDate, t.dueTime) : t.dueDate;
+    const completed = hasTimes
+      ? getScheduleValue(t.completeDate, t.completeTime)
+      : t.completeDate;
     if (completed < due) early++;
     else if (completed > due) late++;
     else onTime++;

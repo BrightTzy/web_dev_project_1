@@ -20,6 +20,18 @@ const initialCategories = [
   { id: 'c4', name: 'Bug', color: '#f44336' } // red
 ];
 
+const getLocalDate = () => {
+  const today = new Date();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${today.getFullYear()}-${month}-${day}`;
+};
+
+const getLocalTime = () => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+};
+
 export const KanbanProvider = ({ children }) => {
   const [tasks, setTasks] = useLocalStorage('kanban_tasks', []);
   const [categories, setCategories] = useLocalStorage('kanban_categories', initialCategories);
@@ -51,9 +63,11 @@ export const KanbanProvider = ({ children }) => {
       if (task.id === id) {
         const updatedTask = { ...task, status: newStatus };
         if (newStatus === 'DONE') {
-          updatedTask.completeDate = new Date().toISOString().split('T')[0];
+          updatedTask.completeDate = getLocalDate();
+          updatedTask.completeTime = getLocalTime();
         } else {
           updatedTask.completeDate = null;
+          updatedTask.completeTime = null;
         }
         return updatedTask;
       }

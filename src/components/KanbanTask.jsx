@@ -1,13 +1,34 @@
 import { Calendar, Clock, User, CheckCircle } from 'lucide-react';
 import { useKanban } from '../context/KanbanContext';
 
+const getToday = () => {
+  const today = new Date();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${today.getFullYear()}-${month}-${day}`;
+};
+
+const getCurrentTime = () => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+};
+
+const formatSchedule = (date, time, fallback) => {
+  if (!date) return fallback;
+  const formattedDate = new Date(`${date}T00:00:00`).toLocaleDateString();
+  return time ? `${formattedDate} ${time}` : formattedDate;
+};
+
 export default function KanbanTask({ task, onEdit }) {
   const { categories, people, moveTask } = useKanban();
   
   const category = categories.find(c => c.id === task.category);
   const person = people.find(p => p.id === task.responsiblePerson);
   
-  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'DONE';
+  const isOverdue = task.dueDate && (
+    task.dueDate < getToday() ||
+    (task.dueDate === getToday() && task.dueTime && task.dueTime < getCurrentTime())
+  ) && task.status !== 'DONE';
 
   return (
         <div className="task-card" onClick={() => onEdit(task)}>
@@ -17,9 +38,14 @@ export default function KanbanTask({ task, onEdit }) {
                 {category.name}
               </span>
             ) : <span></span>}
-            {isOverdue && (
+            {isOverdue && task.status !== 'DONE' && (
               <span className="task-chip" style={{ backgroundColor: '#fee2e2', color: '#ef4444' }}>
                 Overdue
+              </span>
+            )}
+            {task.status === 'DONE' && (
+              <span className="task-chip completed-chip">
+                Completed
               </span>
             )}
           </div>
@@ -38,11 +64,11 @@ export default function KanbanTask({ task, onEdit }) {
             <div className="task-footer-between">
               <div className="task-footer-row">
                 <Calendar size={14} />
-                <span>{task.startDate ? new Date(task.startDate).toLocaleDateString() : 'No start'}</span>
+                <span><strong>Start:</strong> {formatSchedule(task.startDate, task.startTime, 'No start')}</span>
               </div>
               <div className={`task-footer-row ${isOverdue ? 'text-danger' : ''}`} style={isOverdue ? { fontWeight: 'bold' } : {}}>
                 <Clock size={14} />
-                <span>{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due'}</span>
+                <span><strong>Due:</strong> {formatSchedule(task.dueDate, task.dueTime, 'No due')}</span>
               </div>
             </div>
 
