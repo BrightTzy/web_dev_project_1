@@ -6,7 +6,6 @@ The project also includes a dashboard that summarizes task progress with status,
 
 ## Features
 
-- Drag-and-drop Kanban board
 - Create, edit, and delete tasks
 - Task categories, assignees, priorities, descriptions, and due dates
 - Automatic completion dates for finished tasks
@@ -18,7 +17,6 @@ The project also includes a dashboard that summarizes task progress with status,
 - React
 - Vite
 - React Router
-- `@hello-pangea/dnd`
 - Recharts
 - Lucide React
 
