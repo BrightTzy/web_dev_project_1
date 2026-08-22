@@ -66,5 +66,5 @@ npm run lint     # Run Oxlint
 
 - Member 1: Min Khant Tin
 - Member 2: Saw Lin Htet Oo
-- Member 3: Min Khant Tin
+- Member 3: Shin Thant Aung
 
