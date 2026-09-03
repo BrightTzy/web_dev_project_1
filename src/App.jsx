@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 function App() {
   return (
     <KanbanProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Board />} />
