@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { v4 as uuidv4 } from "uuid";
 import peopleData from "../data/people.json";
@@ -35,20 +35,48 @@ export const KanbanProvider = ({ children }) => {
 
   const people = peopleData;
 
+  useEffect(() => {
+    const completedTasks = tasks.map((task) =>
+      task.status === "DONE" && !task.completeDate
+        ? {
+            ...task,
+            completeDate: getLocalDate(),
+            completeTime: getLocalTime(),
+          }
+        : task,
+    );
+    if (completedTasks.some((task, index) => task !== tasks[index])) {
+      setTasks(completedTasks);
+    }
+  }, [tasks, setTasks]);
+
   const addTask = (taskData) => {
     const newTask = {
       ...taskData,
       id: uuidv4(),
       status: taskData.status || "TO DO",
     };
+    if (newTask.status === "DONE") {
+      newTask.completeDate = getLocalDate();
+      newTask.completeTime = getLocalTime();
+    }
     setTasks([...tasks, newTask]);
   };
 
   const updateTask = (id, updatedData) => {
     setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, ...updatedData } : task,
-      ),
+      tasks.map((task) => {
+        if (task.id !== id) return task;
+        const updatedTask = { ...task, ...updatedData };
+        if (updatedTask.status === "DONE" && task.status !== "DONE") {
+          updatedTask.completeDate = getLocalDate();
+          updatedTask.completeTime = getLocalTime();
+        } else if (updatedTask.status !== "DONE") {
+          updatedTask.completeDate = null;
+          updatedTask.completeTime = null;
+        }
+        return updatedTask;
+      }),
     );
   };
 

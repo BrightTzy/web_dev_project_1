@@ -1,3 +1,9 @@
+## Team Members
+
+- Member 1: Min Khant Tin
+- Member 2: Saw Lin Htet Oo
+- Member 3: Shin Thant Aung
+
 # Kanban Project
 
 A React-based Kanban task management application for organizing project work. Users can create, edit, and delete tasks, assign categories and people, set due dates, and move tasks between `TO DO`, `DOING`, and `DONE` columns with drag and drop.
@@ -57,14 +63,8 @@ npm run lint     # Run Oxlint
 5. Open `/dashboard` to review progress statistics and charts.
 
 ## Screenshot
+
 ![Kanban project screenshot](ss/1.png)
 ![Kanban project screenshot](ss/2.png)
 ![Kanban project screenshot](ss/3.png)
 ![Kanban project screenshot](ss/4.png)
-
-## Team Members
-
-- Member 1: Min Khant Tin
-- Member 2: Saw Lin Htet Oo
-- Member 3: Shin Thant Aung
-
