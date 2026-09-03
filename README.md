@@ -58,16 +58,16 @@ npm run lint     # Run Oxlint
 
 1. Open the Kanban board at `/`.
 2. Select **New Task** to create a task.
-3. Drag tasks between the workflow columns to update their status.
+3. Move tasks between the workflow columns to update their status.
 4. Select a task to edit or delete it.
 5. Open `/dashboard` to review progress statistics and charts.
 
 ## Screenshot
 
-![Kanban project screenshot](ss/1.png)
-![Kanban project screenshot](ss/2.png)
-![Kanban project screenshot](ss/3.png)
-![Kanban project screenshot](ss/4.png)
+![Kanban project screenshot](ss/1_new.png)
+![Kanban project screenshot](ss/2_new.png)
+![Kanban project screenshot](ss/3_new.png)
+![Kanban project screenshot](ss/4_new.png)
 ![Kanban project screenshot](ss/5.png)
 ![Kanban project screenshot](ss/6.png)
 ![Kanban project screenshot](ss/7.png)
